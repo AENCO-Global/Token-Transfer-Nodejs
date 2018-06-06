@@ -29,7 +29,12 @@ module.exports = function(contractJSON, walletJSON, senderKey, log ) {
     const web3 = new Web3(new Web3.providers.HttpProvider(contractNet));
     const contract = new web3.eth.Contract(contractAbi,contractAdd);
 
-    this.sendSigned = function(txData, cb) { // Sends signed transaction.
+    this.createWallet = function(cb) {
+        result = web3.eth.accounts.create();
+        cb(result);
+    };
+
+    this.sendSigned = function(txData) { // Sends signed transaction.
         var privateKeyBuff = Buffer.from(walletKey, 'hex');
         var transaction = new Tx(txData);
 

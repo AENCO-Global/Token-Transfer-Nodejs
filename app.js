@@ -36,14 +36,26 @@ function main(argv) {
     someTokens = 60000
     receiverWallet = "0x244c0d5533576A9685439B14a9aA7a818b832Bd1";
 
+
+    // create a wallet
+    ethereum.createWallet(result =>{
+        log.debug("Wallet Add is:", result.address);
+        log.debug("Private Key is:", result.privateKey);
+    });
+
+    //Get balance
+    ethereum.getBalance(receiverWallet, result => {
+        log.info(receiverWallet, " has a Balance of ",result);
+    });
+
     //Send transaction, Call back should have the After balance
     ethereum.send(receiverWallet, someTokens, transactionStatus => {
+        log.info("Transaction Hash:", transactionStatus);
         ethereum.getBalance(receiverWallet, result => {
-            log.info("Transaction Hash:", transactionStatus);
             if (1 == transactionStatus) { //Should be 1, if not, there was an error somewhere.
                 log.info("Balance :",result," Transaction Completed Successfully","You may want to verify in the future that the Totals are correct");
             } else {
-                log.info("Balance :",result,"What the fuck Transaction Failed with a Zero Status. Need manual verification, Pool should be unchanged");
+                log.warn("Balance :",result,"What the fuck Transaction Failed with a Zero Status. Need manual verification, Pool should be unchanged");
             }
         });
     });
