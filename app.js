@@ -10,8 +10,11 @@
 */
 // const debug = require('debug')('ethermod');
 const debug = require('log4js');
-var Ethereum = require('./ethereum.js');
 const debugLevel = 'debug'; // options include, [trace, debug,info,warn,error,fatal]
+var Ethereum = require('./ethereum.js'),
+    express = require('express'),
+    app = express(),
+    port = process.env.PORT || 8001;
 
 main(process.argv);
 
@@ -25,13 +28,40 @@ function main(argv) {
     });
     const log = debug.getLogger('ethereum');
 
+    // Start the Server Monitoring
+    app.listen(port, () => log.warn("Server started Listening on port ". port));
+
+    app.get('/', (req, res) => {
+        responce = "Welcome to the API \n<br/>";
+        responce += "<h2>createWallet</h2> \n<br/>";
+        responce += "<h2>getBalance</h2> \n<br/>";
+        responce += "<h2>sendTokens</h2> \n<br/>";
+        res.send(responce);
+    });
+
+    app.get('/createWallet', (req, res) => {
+        responce += "<h2>createWallet</h2> \n<br/>";
+        res.send(responce);
+    });
+
+    app.get('/send', (req, res) => {
+        responce += "<h2>send</h2> \n<br/>";
+        res.send(responce);
+    });
+
+    app.get('/getBalance', (req, res) => {
+        responce += "<h2>createWallet</h2> \n<br/>";
+        res.send(responce);
+    });
+
+
     // as a service this does not need to receive paramters
     if (argv.length < 3) { // [0],[1],[2] = 3
         log.trace("Missing Private key in the command line");
         return; //Terminate the execution
     }
     walletKey = argv[2]; // 2 is the First Argument
-    var ethereum = new Ethereum('contracts/aen-test.json', 'wallets/out.json', walletKey, log);
+    var ethereum = new Ethereum('contracts/aen-test.json', 'wallets/out.json', log);
 
     someTokens = 60000
     receiverWallet = "0x244c0d5533576A9685439B14a9aA7a818b832Bd1";
@@ -49,7 +79,7 @@ function main(argv) {
     });
 
     //Send transaction, Call back should have the After balance
-    ethereum.send(receiverWallet, someTokens, transactionStatus => {
+    ethereum.send(receiverWallet, someTokens, walletKey, transactionStatus => {
         log.info("Transaction Hash:", transactionStatus);
         ethereum.getBalance(receiverWallet, result => {
             if (1 == transactionStatus) { //Should be 1, if not, there was an error somewhere.

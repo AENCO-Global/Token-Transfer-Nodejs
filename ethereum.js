@@ -4,7 +4,7 @@
  resolves if all items have been retrieved.
  pass the log object from the calling application, see Notes in the MD for help
 */
-module.exports = function(contractJSON, walletJSON, senderKey, log ) {
+module.exports = function(contractJSON, walletJSON, log ) {
     const Web3 = require('web3');
     const Tx = require('ethereumjs-tx');
     const fs = require('fs');
@@ -19,7 +19,6 @@ module.exports = function(contractJSON, walletJSON, senderKey, log ) {
     // Sender walet Details from the json file
     var walletFile = JSON.parse(fs.readFileSync(walletJSON,'utf-8'));
     var walletFrom = walletFile.address;
-    var walletKey = senderKey;
 
     log.info("Contract Add:",contractAdd);
     log.info("Contract Add:",contractAdd);
@@ -34,7 +33,7 @@ module.exports = function(contractJSON, walletJSON, senderKey, log ) {
         cb(result);
     };
 
-    this.sendSigned = function(txData) { // Sends signed transaction.
+    this.sendSigned = function(txData, walletKey) { // Sends signed transaction.
         var privateKeyBuff = Buffer.from(walletKey, 'hex');
         var transaction = new Tx(txData);
 
@@ -72,7 +71,7 @@ module.exports = function(contractJSON, walletJSON, senderKey, log ) {
             });
     };
 
-    this.send = function(tokensTo, tokenQuantity, cb ) {
+    this.send = function(tokensTo, tokenQuantity, walletKey, cb ) {
         web3.eth.getTransactionCount(walletFrom).then(txCount => { // get transactions no to create a fresh nonce
             web3.eth.net.getId().then(chainId => {
                 log.debug("Sending ",tokenQuantity,"From [",walletFrom, "] to [",tokensTo, "]");
@@ -88,7 +87,7 @@ module.exports = function(contractJSON, walletJSON, senderKey, log ) {
                     data: contract.methods.transfer(tokensTo, tokenQuantity).encodeABI(),
                     chainId:chainId
                 };
-                this.sendSigned(txData, transactionHash => { // Call to Send the transaction
+                this.sendSigned(txData, walletKey, transactionHash => { // Call to Send the transaction
                     cb(transactionHash);
                 });
             });
