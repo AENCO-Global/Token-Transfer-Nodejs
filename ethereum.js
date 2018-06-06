@@ -2,8 +2,9 @@
  Streams all values from a public contract array. Callback is a function that takes a single
  argument, one item from the array. Returns a promise that rejects if there is any error or
  resolves if all items have been retrieved.
+ pass the log object from the calling application, see Notes in the MD for help
 */
-module.exports = function(contractJSON, walletJSON, senderKey ) {
+module.exports = function(contractJSON, walletJSON, senderKey, log ) {
     const Web3 = require('web3');
     const Tx = require('ethereumjs-tx');
     const fs = require('fs');
@@ -20,42 +21,56 @@ module.exports = function(contractJSON, walletJSON, senderKey ) {
     var walletFrom = walletFile.address;
     var walletKey = senderKey;
 
-    console.log("Contract Add:",contractAdd);
-    console.log("Contract Net:",contractNet);
-    console.log("Sender Add:", walletFrom);
-    console.log("Sender Key:", walletKey);
+    log.info("Contract Add:",contractAdd);
+    log.info("Contract Add:",contractAdd);
+    log.info("Contract Net:",contractNet);
+    log.info("Sender Add:", walletFrom);
 
     const web3 = new Web3(new Web3.providers.HttpProvider(contractNet));
     const contract = new web3.eth.Contract(contractAbi,contractAdd);
 
     this.sendSigned = function(txData, cb) { // Sends signed transaction.
-        console.log("Private Key:",walletKey);
         var privateKeyBuff = Buffer.from(walletKey, 'hex');
         var transaction = new Tx(txData);
-        transaction.sign(privateKeyBuff); //Sign the transaction
-        var serializedTx = transaction.serialize().toString('hex');
+
+        try {
+            transaction.sign(privateKeyBuff); //Sign the transaction
+            var serializedTx = transaction.serialize().toString('hex');
+        } catch(err) {
+            if(err.message.indexOf('private key length') > -1 ) {
+                log.warn("Private Key Error (Invalid Private Key) ");
+            } else {
+                log.warn("Private Key Error (Invalid Private Key) ");
+            }
+            return;
+        }
+
         web3.eth.sendSignedTransaction('0x' + serializedTx)
             .once('receipt', function(receipt){
-                console.log("Receipt:",receipt.to);
+                log.info("Receipt:",receipt.to);
                 web3.eth.getTransaction(receipt.transactionHash).then(transaction => {
-                    console.log("Transaction Code:", transaction.hash);
+                    log.info("Transaction Code:", transaction.hash);
                 });
             })
             .on('confirmation', function(confirmationNo, receipt) {
-                console.log("Confirmation No:",confirmationNo);
+                log.info("Confirmation No:",confirmationNo);
                 if (confirmationNo == 24) {
                     cb(receipt.status);
                 }
             })
             .on('error', function(err){
-                console.log("Contract Error (Possible out of Gas)", err);
+                if(err.message.indexOf('insufficient funds') > -1 ) {
+                    log.error("Contract Error","(Possible out of Gas) ");
+                } else {
+                    log.error("Contract Error (Unexpected) \n", err);
+                }
             });
     };
 
     this.send = function(tokensTo, tokenQuantity, cb ) {
         web3.eth.getTransactionCount(walletFrom).then(txCount => { // get transactions no to create a fresh nonce
             web3.eth.net.getId().then(chainId => {
-                console.log("Sending ",tokenQuantity,"From [",walletFrom, "] to [",tokensTo, "]");
+                log.debug("Sending ",tokenQuantity,"From [",walletFrom, "] to [",tokensTo, "]");
 
                 const txData = { // construct the transaction data
                     nonce: web3.utils.toHex(txCount),
