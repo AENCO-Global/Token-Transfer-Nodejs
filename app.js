@@ -30,8 +30,14 @@ function main(argv) {
     //---------------------------------------------------------------------------------------
 
     // Start the Server Monitoring ----------------------------------------------------------
-    app.listen(port, () => log.warn("Server started Listening on port ". port));
+    app.listen(port, () => log.warn("Server started Listening on port ", port));
+
     //---------------------------------------------------------------------------------------
+
+    // create the base  object and paramters for the deployed system-------------------------
+    var ethereum = new Ethereum('contracts/aen-test.json', 'wallets/out.json', log);
+    // --------------------------------------------------------------------------------------
+
 
     /* ------------------------------------------------------------ */
     app.get('/', (req, res) => { // default fall back
@@ -75,34 +81,28 @@ function main(argv) {
         });
     });
 
-    app.get('/send/rx/:add/amt/:tokens/key/:walletKey', (req, res) => {
-        responce = "<h2>send</h2> \n<br/>";
-        res.send(responce);
-    });
+    app.get('/send', (req, res) => {
+        add = req.query.address;
+        ttl = parseFloat(req.query.amount);
+        amt = ttl.toFixed(8).replace(".","");  //Pad zeros to the decimal amount and remove the decimal place
+        key = req.query.key;
+        log.info("Sending ", amt," to ", add , " with the key ",key);
 
-
-    // as a service this does not need to receive paramters
-    if (argv.length < 3) { // [0],[1],[2] = 3
-        log.trace("Missing Private key in the command line");
-        return; //Terminate the execution
-    }
-    walletKey = argv[2]; // 2 is the First Argument
-    var ethereum = new Ethereum('contracts/aen-test.json', 'wallets/out.json', log);
-
-    someTokens = 60000
-    receiverWallet = "0x244c0d5533576A9685439B14a9aA7a818b832Bd1";
-
-
-    //Send transaction, Call back should have the After balance
-    ethereum.send(receiverWallet, someTokens, walletKey, transactionStatus => {
-        log.info("Transaction Hash:", transactionStatus);
-        ethereum.getBalance(receiverWallet, result => {
-            if (1 == transactionStatus) { //Should be 1, if not, there was an error somewhere.
-                log.info("Balance :",result," Transaction Completed Successfully","You may want to verify in the future that the Totals are correct");
-            } else {
-                log.warn("Balance :",result,"What the fuck Transaction Failed with a Zero Status. Need manual verification, Pool should be unchanged");
-            }
+        //Send transaction, Call back should have the After balance
+        ethereum.send(add, amt, key, transaction => {
+            log.info("Transaction Hash:", transaction);
+            let resObj = {
+                "code" : 0,
+                "msg" : "Success",
+                "address": add,
+                "total": result,
+                "tx" : transaction
+            };
+            // /rx/:add/amt/:tokens/key/:walletKey
+            responce = JSON.stringify(resObj);
+            res.send(responce);
         });
     });
+
     return 0;
 }

@@ -23,8 +23,7 @@ module.exports = function(contractJSON, walletJSON, log ) {
     log.info("Contract Add:",contractAdd);
     log.info("Contract Add:",contractAdd);
     log.info("Contract Net:",contractNet);
-    log.info("Sender Add:", walletFrom);
-
+    log.info("Out Wallet Add:", walletFrom);
     const web3 = new Web3(new Web3.providers.HttpProvider(contractNet));
     const contract = new web3.eth.Contract(contractAbi,contractAdd);
 
