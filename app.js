@@ -8,7 +8,6 @@
     or
     nodemon app.js a1b2c3d4e5f6g7h8i9j10k11l12m13n14o15p16q17r18s19t20
 */
-// const debug = require('debug')('ethermod');
 const debug = require('log4js');
 const debugLevel = 'debug'; // options include, [trace, debug,info,warn,error,fatal]
 var Ethereum = require('./ethereum.js'),
@@ -19,6 +18,7 @@ var Ethereum = require('./ethereum.js'),
 main(process.argv);
 
 function main(argv) {
+    // set up the debugger and logging system ------------------------------------------------
     debug.configure({
         appenders: {
             out: {type: 'stdout' },
@@ -27,30 +27,56 @@ function main(argv) {
         categories: { default: { appenders:['app', 'out'], level: 'debug'}}
     });
     const log = debug.getLogger('ethereum');
+    //---------------------------------------------------------------------------------------
 
-    // Start the Server Monitoring
+    // Start the Server Monitoring ----------------------------------------------------------
     app.listen(port, () => log.warn("Server started Listening on port ". port));
+    //---------------------------------------------------------------------------------------
 
-    app.get('/', (req, res) => {
-        responce = "Welcome to the API \n<br/>";
-        responce += "<h2>createWallet</h2> \n<br/>";
-        responce += "<h2>getBalance</h2> \n<br/>";
-        responce += "<h2>sendTokens</h2> \n<br/>";
+    /* ------------------------------------------------------------ */
+    app.get('/', (req, res) => { // default fall back
+        responce = "<h1>Welcome to the API</h1> \n";
+        responce += "<h2>For more details refer to the Documentation</h2> \n";
+        responce += "<h3><a href='https://www.notion.so/aencoins/Ethereum-API-7ccc462d3ac04c76b882fb15cdc63390'>https://www.notion.so/aencoins/Ethereum-API-7ccc462d3ac04c76b882fb15cdc63390</a> </h3>\n";
         res.send(responce);
     });
 
-    app.get('/createWallet', (req, res) => {
-        responce += "<h2>createWallet</h2> \n<br/>";
-        res.send(responce);
+    /* ------------------------------------------------------------ */
+    app.get('/createWallet', (req, res) => {  // create a wallet
+        ethereum.createWallet(result =>{
+            log.debug("Wallet Add is:", result.address);
+            log.debug("Private Key is:", result.privateKey);
+            let resObj = {
+                "code" : 0,
+                "msg" : "Success",
+                "address": result.address,
+                "key": result.privateKey
+            };
+            responce = JSON.stringify(resObj);
+            res.send(responce);
+        });
     });
 
-    app.get('/send', (req, res) => {
-        responce += "<h2>send</h2> \n<br/>";
-        res.send(responce);
+
+    /* ------------------------------------------------------------ */
+    app.get('/getBalance', (req, res) => {  //Get balance
+        add = req.query.address;
+        log.debug(add)
+        ethereum.getBalance(add, result => {
+            log.info(add, " has a Balance of ",result);
+            let resObj = {
+                "code" : 0,
+                "msg" : "Success",
+                "address": add,
+                "total": result
+            };
+            responce = JSON.stringify(resObj);
+            res.send(responce);
+        });
     });
 
-    app.get('/getBalance', (req, res) => {
-        responce += "<h2>createWallet</h2> \n<br/>";
+    app.get('/send/rx/:add/amt/:tokens/key/:walletKey', (req, res) => {
+        responce = "<h2>send</h2> \n<br/>";
         res.send(responce);
     });
 
@@ -66,17 +92,6 @@ function main(argv) {
     someTokens = 60000
     receiverWallet = "0x244c0d5533576A9685439B14a9aA7a818b832Bd1";
 
-
-    // create a wallet
-    ethereum.createWallet(result =>{
-        log.debug("Wallet Add is:", result.address);
-        log.debug("Private Key is:", result.privateKey);
-    });
-
-    //Get balance
-    ethereum.getBalance(receiverWallet, result => {
-        log.info(receiverWallet, " has a Balance of ",result);
-    });
 
     //Send transaction, Call back should have the After balance
     ethereum.send(receiverWallet, someTokens, walletKey, transactionStatus => {
