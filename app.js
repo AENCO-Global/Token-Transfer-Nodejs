@@ -82,9 +82,10 @@ function main(argv) {
     });
 
     app.get('/send', (req, res) => {
+        dec = 8; // The decimal place, should get from the contract
         add = req.query.address;
         ttl = parseFloat(req.query.amount);
-        amt = ttl.toFixed(8).replace(".","");  //Pad zeros to the decimal amount and remove the decimal place
+        amt = ttl.toFixed(dec).replace(".","");  //Pad zeros to the decimal amount and remove the decimal place
         key = req.query.key;
         log.info("Sending ", amt," to ", add , " with the key ",key);
 
