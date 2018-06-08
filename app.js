@@ -36,7 +36,16 @@ function main(argv) {
     //---------------------------------------------------------------------------------------
 
     // create the base  object and paramters for the deployed system-------------------------
-    var ethereum = new Ethereum('contracts/aen-test.json', 'wallets/out.json', log);
+    let wallets =   {   "test"      : 'wallets/out.json' ,
+                        "main"      : 'wallets/out.json',
+                        "default"   : 'wallets/out.json'
+                    };
+    let contracts = {   "test"      : 'contracts/aen-test.json' ,
+                        "main"      : 'contracts/aen-live.json',
+                        "default"   : 'contracts/aen-test.json'
+    };
+    // Note to change this for Jenkins deployment, possible replace with tags.
+    let ethereum = new Ethereum(contracts.test, wallets.default, log);
     // --------------------------------------------------------------------------------------
 
 
