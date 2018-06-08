@@ -24,6 +24,7 @@ module.exports = function(contractJSON, walletJSON, log ) {
     log.info("Contract Add:",contractAdd);
     log.info("Contract Net:",contractNet);
     log.info("Out Wallet Add:", walletFrom);
+
     const web3 = new Web3(new Web3.providers.HttpProvider(contractNet));
     const contract = new web3.eth.Contract(contractAbi,contractAdd);
 
@@ -32,65 +33,84 @@ module.exports = function(contractJSON, walletJSON, log ) {
         cb(result);
     };
 
-    this.sendSigned = function(txData, walletKey) { // Sends signed transaction.
-        var privateKeyBuff = Buffer.from(walletKey, 'hex');
-        var transaction = new Tx(txData);
+    this.send = function(tokensTo, tokenQuantity, walletKey, cb ) {
+        web3.eth.getTransactionCount(walletFrom).then(txCount => { // get transactions no to create a fresh nonce
+            web3.eth.net.getId().then(chainId => {
+                log.info("Sending",tokenQuantity,"From ",walletFrom, "to",tokensTo, " Chain",chainId );
+
+                const txData = { // construct the transaction data
+                    nonce: web3.utils.toHex(txCount),
+                    gasLimit: web3.utils.toHex('90000'),
+                    gasPrice: web3.utils.toHex('10000000000'), // 10 Gwei (From [1 Gwei]:1,000,000,000 to [99 Gwei]:99,000,000,000
+                    gas: web3.utils.toHex('4700000'),
+                    to: contractAdd,
+                    from: walletFrom,
+                    value: "0x00",
+                    data: contract.methods.transfer(tokensTo, tokenQuantity).encodeABI(),
+                    chainId: chainId
+                };
+                this.sendSigned(txData, walletKey, txResult => { // Call to Send the transaction
+                    cb(txResult);
+                });
+            });
+        });
+    };
+
+    this.sendSigned = function(txData, walletKey, cb) { // Sends signed transaction.
+        let privateKeyBuff = Buffer.from(walletKey, 'hex');
+        let transaction = new Tx(txData);
+        let cbObj = {};
+        cbObj.code = 0 ;
+        cbObj.msg = "" ;
+        cbObj.tx = "" ;
 
         try {
             transaction.sign(privateKeyBuff); //Sign the transaction
             var serializedTx = transaction.serialize().toString('hex');
         } catch(err) {
             if(err.message.indexOf('private key length') > -1 ) {
+                cbObj.code = -2;
+                cbObj.msg = "Error (Invalid Private Key Length)";
                 log.warn("Private Key Error (Invalid Private Key) ");
             } else {
-                log.warn("Private Key Error (Invalid Private Key) ");
+                cbObj.code = -1;
+                log.warn("Private Key Error (Invalid Private Key) ",err);
             }
+            cb(cbObj);
             return;
         }
 
         web3.eth.sendSignedTransaction('0x' + serializedTx)
             .once('receipt', function(receipt){
-                log.info("Receipt:",receipt.to);
+                log.info("Receipt to:",receipt.to);
                 web3.eth.getTransaction(receipt.transactionHash).then(transaction => {
                     log.info("Transaction Code:", transaction.hash);
+                    cbObj.code = 0;
+                    cbObj.msg = "Success"
+                    cbObj.tx = transaction;
+                    cb(cbObj);
                 });
             })
-            .on('confirmation', function(confirmationNo, receipt) {
-                log.info("Confirmation No:",confirmationNo);
-                if (confirmationNo == 24) {
-                    cb(receipt.status);
-                }
-            })
+            // This block will trigger for every confirmation trigger from the blockchain
+            // .on('confirmation', function(confirmationNo, receipt) {
+            //     log.debug("Confirmation No:",confirmationNo);
+            //     if (confirmationNo == 24) {
+            //         cb(receipt.status);
+            //     }
+            // })
             .on('error', function(err){
                 if(err.message.indexOf('insufficient funds') > -1 ) {
-                    log.error("Contract Error","(Possible out of Gas) ");
+                    log.error("Contract Error","(Possible out of Gas) ", err );
+                    cbObj.code = -3;
+                    cbObj.msg = "Error (Out of Gas)";
+                    cb(cbObj);
                 } else {
                     log.error("Contract Error (Unexpected) \n", err);
+                    cbObj.code = -4;
+                    cbObj.msg = "Error (Check Logs)";
+                    cb(cbObj);
                 }
             });
-    };
-
-    this.send = function(tokensTo, tokenQuantity, walletKey, cb ) {
-        web3.eth.getTransactionCount(walletFrom).then(txCount => { // get transactions no to create a fresh nonce
-            web3.eth.net.getId().then(chainId => {
-                log.debug("Sending ",tokenQuantity,"From [",walletFrom, "] to [",tokensTo, "]");
-
-                const txData = { // construct the transaction data
-                    nonce: web3.utils.toHex(txCount),
-                    gasLimit: web3.utils.toHex(25000),
-                    gasPrice: web3.utils.toHex(10e9), // 10 Gwei
-                    gas: 210000,
-                    to: contractAdd,
-                    from: walletFrom,
-                    value: web3.utils.toHex(web3.utils.toWei("0", 'wei')),
-                    data: contract.methods.transfer(tokensTo, tokenQuantity).encodeABI(),
-                    chainId:chainId
-                };
-                this.sendSigned(txData, walletKey, transactionHash => { // Call to Send the transaction
-                    cb(transactionHash);
-                });
-            });
-        });
     };
     this.getBalance = function(tokensTo, cb) {
         contract.methods.balanceOf(tokensTo).call().then(function(balance) {

@@ -15,7 +15,7 @@ var Ethereum = require('./ethereum.js'),
     app = express(),
     port = process.env.PORT || 8001;
 
-main(process.argv);
+main();
 
 function main(argv) {
     // set up the debugger and logging system ------------------------------------------------
@@ -24,10 +24,11 @@ function main(argv) {
             out: {type: 'stdout' },
             app: {type: 'file', filename: 'ethereum-api.log', maxLogSize: 641024, backups: 5}
             },
-        categories: { default: { appenders:['app', 'out'], level: 'debug'}}
+        categories: { default: { appenders:['app', 'out'], level: debugLevel}}
     });
     const log = debug.getLogger('ethereum');
     //---------------------------------------------------------------------------------------
+
 
     // Start the Server Monitoring ----------------------------------------------------------
     app.listen(port, () => log.warn("Server started Listening on port ", port));
@@ -51,7 +52,7 @@ function main(argv) {
     app.get('/createWallet', (req, res) => {  // create a wallet
         ethereum.createWallet(result =>{
             log.debug("Wallet Add is:", result.address);
-            log.debug("Private Key is:", result.privateKey);
+            // log.debug("Private Key is:", result.privateKey);  //Do not use this accept in Emergency
             let resObj = {
                 "code" : 0,
                 "msg" : "Success",
@@ -81,6 +82,7 @@ function main(argv) {
         });
     });
 
+    /* ------------------------------------------------------------ */
     app.get('/send', (req, res) => {
         dec = 8; // The decimal place, should get from the contract
         add = req.query.address;
@@ -90,14 +92,13 @@ function main(argv) {
         log.info("Sending ", amt," to ", add , " with the key ",key);
 
         //Send transaction, Call back should have the After balance
-        ethereum.send(add, amt, key, transaction => {
-            log.info("Transaction Hash:", transaction);
+        ethereum.send(add, amt, key, cbObj => {
             let resObj = {
-                "code" : 0,
+                "code" : cbObj.code,
                 "msg" : "Success",
                 "address": add,
-                "total": result,
-                "tx" : transaction
+                "total": amt,
+                "tx" : cbObj.tx
             };
             // /rx/:add/amt/:tokens/key/:walletKey
             responce = JSON.stringify(resObj);
@@ -105,5 +106,30 @@ function main(argv) {
         });
     });
 
-    return 0;
+    /* ------------------------------------------------------------ */
+    app.post('/send', (req, res) => {
+        dec = 8; // The decimal place, should get from the contract
+        add = req.body.address;
+        ttl = parseFloat(req.body.amount);
+        amt = ttl.toFixed(dec).replace(".","");  //Pad zeros to the decimal amount and remove the decimal place
+        key = req.body.key;
+        log.info("Sending ", amt," to ", add , " with the key ",key);
+
+        //Send transaction, Call back should have the After balance
+        ethereum.send(add, amt, key, cbObj => {
+            let resObj = {
+                "code" : cbObj.code,
+                "msg" : "Success",
+                "address": add,
+                "total": amt,
+                "tx" : cbObj.tx
+            };
+            // /rx/:add/amt/:tokens/key/:walletKey
+            responce = JSON.stringify(resObj);
+            cb(responce);
+        });
+        res.end(responce);
+    });
+
+        return 0;
 }
