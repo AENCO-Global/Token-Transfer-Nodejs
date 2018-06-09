@@ -10,14 +10,14 @@
 */
 const debug = require('log4js');
 const debugLevel = 'debug'; // options include, [trace, debug,info,warn,error,fatal]
-var Ethereum = require('./ethereum.js'),
+let Ethereum = require('./ethereum.js'),
     express = require('express'),
     app = express(),
     port = process.env.PORT || 8001;
 
 main();
 
-function main(argv) {
+function main() {
     // set up the debugger and logging system ------------------------------------------------
     debug.configure({
         appenders: {
@@ -36,9 +36,9 @@ function main(argv) {
     //---------------------------------------------------------------------------------------
 
     // create the base  object and paramters for the deployed system-------------------------
-    let wallets =   {   "test"      : 'wallets/out.json' ,
-                        "main"      : 'wallets/out.json',
-                        "default"   : 'wallets/out.json'
+    let wallets =   {   "test"      : 'wallets/aen-out.json' ,
+                        "main"      : 'wallets/aen-out.json',
+                        "default"   : 'wallets/aen-out.json'
                     };
     let contracts = {   "test"      : 'contracts/aen-test.json' ,
                         "main"      : 'contracts/aen-live.json',
@@ -77,7 +77,7 @@ function main(argv) {
     /* ------------------------------------------------------------ */
     app.get('/getBalance', (req, res) => {  //Get balance
         add = req.query.address;
-        log.debug(add)
+        log.debug(add);
         ethereum.getBalance(add, result => {
             log.info(add, " has a Balance of ",result);
             let resObj = {

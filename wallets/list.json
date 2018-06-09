@@ -1,0 +1,6 @@
+{
+  "out" : {"address":"0x244c0d5533576A9685439B14a9aA7a818b832Bd1", "desc":"Out Wallet on ain net", "Key":"Wallet-Key in the Vault"},
+  "uat" : {"address":"0x0Cb539400641F8949d458b2d5a9e8A3C8bD488f2", "desc":"Wallet send for deployment and testing transfer", "key":"Wallet key Geoffreys Personal"},
+  "T1" : {"address":"0x0Cb539400641F8949d458b2d5a9e8A3C8bD488f2", "desc":"Wallet send for deployment and testing transfer", "key":"Wallet key get it from MEW"},
+  "T2" : {"address":"put you wallet here", "desc":"describe it", "key":"Wallet key is your own"}
+}

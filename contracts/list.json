@@ -1,0 +1,4 @@
+{
+  "aen": {"file":"aen-live.json", "Desc":"This is the Live File for main net contract"},
+  "uat" :{"file":"aen-test.json", "Desc":"This is the Test File for Ropsten deployed contract"}
+}
