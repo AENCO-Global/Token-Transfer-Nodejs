@@ -28,7 +28,7 @@ echo "--=== Start up the services and install dependancies ===--"
 ssh -p 22 $2 "npm init -f"
 ssh -p 22 $2 "npm install"
 ssh -p 22 $2 "npm install -g forever"
-ssh -p 22 $2 "server start ./app.js"
+ssh -p 22 $2 "forever start ./app.js"
 
 
 echo "----====== Verify Deployments-List from Remote ======----"
