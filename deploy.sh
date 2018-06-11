@@ -24,11 +24,10 @@ echo "rsync -avzhe ssh  --rsync-path="""rsync""" ./server/*  jenkins@$2:$3"""
 rsync -avzhe ssh  --rsync-path="rsync" ./server/* jenkins@$2:$3
 
 echo "--=== Start up the services and install dependancies ===--"
-ssh -p 22 $2 "npm init -f"
-ssh -p 22 $2 "npm install"
-ssh -p 22 $2 "npm install forever"
-ssh -p 22 $2 "forever start ./app.js"
-
+ssh -p 22 $2 "yum -y install nodejs"
+ssh -p 22 $2 "npm install && echo 'post-receive: Building...' "
+ssh -p 22 $2 "npm run build && 'post-receive: -> done.'"
+ssh -p 22 $2 "forever stop 0 && forever start ./app.js && 'post-receive: -> Started.'"
 
 echo "----====== Verify Deployments-List from Remote ======----"
 ssh -p 22 $2 "ls -al $3"
