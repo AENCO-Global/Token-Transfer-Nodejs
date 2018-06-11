@@ -28,6 +28,7 @@ echo "--=== Start up the services and install dependancies ===--"
 ssh -p 22 $2 "npm init -f"
 ssh -p 22 $2 "npm install"
 ssh -p 22 $2 "npm init -f"
+ssh -p 22 $2 "server start ./app.js"
 
 
 echo "----====== Verify Deployments-List from Remote ======----"
@@ -35,6 +36,6 @@ ssh -p 22 $2 "ls -al $3"
 ssh -p 22 $2 "ls -al $3/eth"
 echo "---------------------------------------------------------"
 
-echo "--=== Version Deployed is [$1] The folowing output from version.info ===--"
+echo "--=== Version Deployed is [$1] The following output from version.info ===--"
 ssh -p 22 $2 "cat $3/version.info"
-echo "------------The-End-------------------------------------------------------"
+echo "------------The-End--------------------------------------------------------"
