@@ -32,9 +32,10 @@ ssh -p 22 $2 "forever start ./app.js"
 
 echo "----====== Verify Deployments-List from Remote ======----"
 ssh -p 22 $2 "ls -al $3"
-ssh -p 22 $2 "ls -al $3/eth"
 echo "---------------------------------------------------------"
 
 echo "--=== Version Deployed is [$1] The following output from version.info ===--"
 ssh -p 22 $2 "cat $3/version.info"
+ssh -p 22 $2 "cat $3/ehtereum-api.log"
+
 echo "------------The-End--------------------------------------------------------"
