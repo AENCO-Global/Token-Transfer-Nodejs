@@ -27,7 +27,7 @@ rsync -avzhe ssh  --rsync-path="rsync" ./server/* jenkins@$2:$3
 echo "--=== Start up the services and install dependancies ===--"
 ssh -p 22 $2 "npm init -f"
 ssh -p 22 $2 "npm install"
-ssh -p 22 $2 "npm init -f"
+ssh -p 22 $2 "npm install -g forever"
 ssh -p 22 $2 "server start ./app.js"
 
 
