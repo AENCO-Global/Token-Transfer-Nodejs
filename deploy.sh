@@ -7,8 +7,7 @@ echo "[P3] Target Folder is :$3 "
 echo "-------------------------------------------"
 
 echo "----==== Identify the taret server =====---"
-ssh -p 22 $2 "sudo /home/ubuntu/role.sh"
-ssh -p 22 $2 "sudo whoami"
+ssh -p 22 $2 " whoami"
 echo "-------------------------------------------"
 
 echo "---=== Run local Tests on Deployment ===---"
