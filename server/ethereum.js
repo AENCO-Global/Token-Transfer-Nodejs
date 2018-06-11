@@ -119,5 +119,15 @@ module.exports = function(contractJSON, walletJSON, log ) {
                 cb(finalBalance);
             })
         })
+    };
+
+    this.version = function(cb) {
+        fs.readFile('version.info','utf8', function(err,data){
+            if (err) {
+                log.error('Version file missing',err);
+            }
+            cb(data);
+        });
     }
+
 };

@@ -116,6 +116,13 @@ function main() {
     });
 
     /* ------------------------------------------------------------ */
+    app.get('/version',(req,res) =>{
+        ethereum.version(data =>{
+            res.send(data);
+        });
+    });
+
+    /* ------------------------------------------------------------ */
     app.post('/send', (req, res) => {
         dec = 8; // The decimal place, should get from the contract
         add = req.body.address;
