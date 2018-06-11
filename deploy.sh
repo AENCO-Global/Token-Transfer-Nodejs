@@ -15,7 +15,7 @@ echo "No tests yet Defined"
 echo "-------------------------------------------"
 
 echo "--=== Modify Version Information ===--"
-echo "Version $1" > version.info
+echo "Version $1" > ./server/version.info
 ls  -l
 echo "-------------------------------------------"
 
