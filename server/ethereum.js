@@ -135,7 +135,7 @@ module.exports = function(contractJSON, walletJSON, log ) {
             if (err) {
                 log.error('Log File missing',err);
             }
-            cb(data);
+            cb(data.replace(/\r?\n/g, "<br>") );
         });
     }
 
