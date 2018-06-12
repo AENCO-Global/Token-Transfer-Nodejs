@@ -19,17 +19,21 @@ echo "Version $1" > ./server/version.info
 ls  -l
 echo "-------------------------------------------"
 
+echo "--=== Create Target Folder ===--"
+ssh -p 22 $2 "mkdir -p  $3"
+echo "-------------------------------------------"
+
 echo "--=== Transfer files to remote Server ===--"
 echo "rsync -avzhe ssh  --rsync-path="""rsync""" ./server/*  jenkins@$2:$3"""
 rsync -avzhe ssh  --rsync-path="rsync" ./server/* jenkins@$2:$3
 
 echo "--=== Start up the services and install dependancies ===--"
-ssh -p 22 $2 "npm install && echo 'post-receive: Building...' "
+echo "$3/npm install && echo 'post-receive: Building...' "
+ssh -p 22 $2 "$3/npm install && echo 'post-receive: Building...' "
 
-echo "-- Start build --"
-ssh -p 22 $2 "npm run build && 'post-receive: -> done.'"
 echo "-- Stop Start Forever ===--"
-ssh -p 22 $2 "forever stop 0 && forever start ./app.js && 'post-receive: -> Started.'"
+echo "$3/forever stop 0 && $3/forever start ./app.js && 'post-receive: -> Started.'"
+ssh -p 22 $2 "$3/forever stop 0 && $3/forever start ./app.js && 'post-receive: -> Started.'"
 
 echo "----====== Verify Deployments-List from Remote ======----"
 ssh -p 22 $2 "ls -al $3"
@@ -38,5 +42,7 @@ echo "---------------------------------------------------------"
 echo "--=== Version Deployed is [$1] The following output from version.info ===--"
 ssh -p 22 $2 "cat $3/version.info"
 ssh -p 22 $2 "cat $3/ehtereum-api.log"
+ssh -p 22 $2 "cat /home/jenkins/.npm/_logs/2018-06-12T04_12_17_627Z-debug.log"
+
 
 echo "------------The-End--------------------------------------------------------"
