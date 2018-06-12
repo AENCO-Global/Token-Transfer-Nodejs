@@ -123,6 +123,13 @@ function main() {
     });
 
     /* ------------------------------------------------------------ */
+    app.get('/logs',(req,res) =>{
+        ethereum.logs(data =>{
+            res.send(data);
+        });
+    });
+
+    /* ------------------------------------------------------------ */
     app.post('/send', (req, res) => {
         dec = 8; // The decimal place, should get from the contract
         add = req.body.address;

@@ -29,6 +29,7 @@ rsync -avzhe ssh  --rsync-path="rsync" ./server/* jenkins@$2:$3
 
 echo "--=== Start up the services and install dependancies ===--"
 ssh -p 22 $2 "cd $3 ; npm install && echo 'post-receive: Building...' "
+echo "---------------------------------------------------------"
 
 echo "-- Stop Start Forever ===--"
 ssh -p 22 $2 "$3/node_modules/forever/bin/forever stop 0 "

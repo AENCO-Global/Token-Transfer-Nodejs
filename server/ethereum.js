@@ -11,14 +11,14 @@ module.exports = function(contractJSON, walletJSON, log ) {
     const self = this;
 
     // Contract Details from the json file
-    var contractFile = JSON.parse(fs.readFileSync(contractJSON,'utf-8'));
-    var contractAdd = contractFile.address ;
-    var contractNet = contractFile.network ;
-    var contractAbi = contractFile.abi;
+    let contractFile = JSON.parse(fs.readFileSync(contractJSON,'utf-8'));
+    let contractAdd = contractFile.address ;
+    let contractNet = contractFile.network ;
+    let contractAbi = contractFile.abi;
 
     // Sender walet Details from the json file
-    var walletFile = JSON.parse(fs.readFileSync(walletJSON,'utf-8'));
-    var walletFrom = walletFile.address;
+    let walletFile = JSON.parse(fs.readFileSync(walletJSON,'utf-8'));
+    let walletFrom = walletFile.address;
 
     log.info("Contract Add:",contractAdd);
     log.info("Contract Add:",contractAdd);
@@ -125,6 +125,15 @@ module.exports = function(contractJSON, walletJSON, log ) {
         fs.readFile('version.info','utf8', function(err,data){
             if (err) {
                 log.error('Version file missing',err);
+            }
+            cb(data);
+        });
+    };
+
+    this.logs = function(cb) {
+        fs.readFile('ethereum-api.log','utf8', function(err,data){
+            if (err) {
+                log.error('Log File missing',err);
             }
             cb(data);
         });
