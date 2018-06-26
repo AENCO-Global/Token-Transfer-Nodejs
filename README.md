@@ -8,7 +8,7 @@ format:
     node app.js [sending wallet key]
 ```
 
-    Example: Key is fake, use your own...
+Example: Key is fake, use your own...
 ```
     node app.js a1b2c3d4e5f6g7h8i9j10k11l12m13n14o15p16q17r18s19t20
     or
