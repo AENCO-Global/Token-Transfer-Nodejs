@@ -16,8 +16,11 @@ Example: Key is fake, use your own...
 ```
 
 With Debug installed for logging. use the command as follows: you may like to consider winston for more function
-    npm install debug --save  // To install the module
-    then
-    DEBUG=ethermod nodemon ./app.js [my private key]
 
-    This has changed, and now you can interact at the get command line.
+```
+npm install debug --save  // To install the module
+then
+DEBUG=ethermod nodemon ./app.js [my private key]
+```
+
+This has changed, and now you can interact at the get command line.
