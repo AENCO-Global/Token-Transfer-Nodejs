@@ -1,7 +1,7 @@
 {
   "title" : "AEN Coin Token on Live Net",
   "address": "0x0BEf619cF38cF0c22967289b8419720fBd1Db9f7",
-  "network": "https://mainnet.infura.io/4RpsRE8iPyHiRuJAiBs6",
+  "network": "https://mainnet.infura.io/v3/0060fa788b624e818467ad15aef59783",
   "abi": [
     {
       "constant": true,

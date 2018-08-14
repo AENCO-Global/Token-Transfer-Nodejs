@@ -1,7 +1,7 @@
 {
   "title" : "AEN Coin Token on Test Net",
   "address": "0x8ec1865e528bbf32a155519c73995d704305acd1",
-  "network": "https://ropsten.infura.io/2TSJucBThbveDpeym7cM",
+  "network": "https://ropsten.infura.io/v3/0060fa788b624e818467ad15aef59783",
   "type" : "EC20",
   "abi": [
     {
